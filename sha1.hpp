@@ -271,7 +271,7 @@ class sha1 {
     char hex[SHA1_HEX_SIZE];
     char base64[SHA1_BASE64_SIZE];
 
-    void get_sha1_from_file(char* path) {
+    void get_sha1_from_file(const char* path) {
         fstream f;
         f.open(path);
         while (!f.eof()) {
@@ -291,7 +291,7 @@ class sha1 {
 int main(int args, char** argv) {
     sha1 s("");
     s.get_sha1_from_file(argv[1]);
-    cout<<s.hex<<endl;
+    cout << s.hex << endl;
 }
 
 #endif
