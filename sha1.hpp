@@ -282,6 +282,7 @@ class sha1 {
         }
         finalize();
         print_hex(this->hex);
+        f.close();
     }
 };
 #endif
