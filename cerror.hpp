@@ -8,7 +8,7 @@
 using namespace std;
 namespace cerror {
     
-void occur_error(const char* info);
+void occur_error(string info);
 
 }  // namespace cerror
 

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void cerror::occur_error(const char* info) {
+void cerror::occur_error(string info) {
     cerr << "Error: " << info << endl;
     exit(1);
 }
