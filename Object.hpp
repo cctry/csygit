@@ -22,9 +22,9 @@ class Object {
     void init_hdr();
 
    public:
-    virtual void save_as_obj(string path) = 0;
+    virtual void save_as_obj(string obj_path) = 0;
     obj_hdr_t& get_hdr();
-    virtual string& get_hash() = 0;
+    string& get_hash();
 };
 
 #endif

@@ -60,10 +60,6 @@ Blob* Blob::get_blob_from_db(string hash) {
     return res;
 }
 
-string& Blob::get_hash() {
-    return hash;
-}
-
 string& Blob::get_content() {
     return content;
 }
