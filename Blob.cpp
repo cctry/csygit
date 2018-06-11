@@ -9,14 +9,22 @@
 
 using namespace std;
 using namespace cerror;
-// static construct function for blob from a normal file
+
+// static construction function for blob from a normal file
 Blob* Blob::get_blob_from_file(string path) {
     Blob* res = new Blob;
     res->init_hdr();
+#ifdef DEBUG
+    cout << "new a blob: " << path << endl;
+#endif
     sha1 s("");
     s.get_sha1_from_file(path.c_str());
     res->path = path;
     res->hash = string(s.hex);
+    res->permission = util::get_file_permission(path);
+#ifdef DEBUG
+    cout << "hash: " << res->hash << endl;
+#endif
     res->content = util::get_file_content(path);
     int size = util::get_file_size(path);
     res->hdr.size = size;
@@ -66,12 +74,15 @@ string& Blob::get_content() {
 
 /*
  * The structure of blob file.
- * |version|signature|size|path_len|type|time|path|
+ * |version|signature|size|path_len|time|  <--- header
+ * |permission|
+ * |path|
  * |content|
  */
 void Blob::save_as_obj(string obj_path) {
     ofstream f(obj_path.c_str(), ios::binary);
     f.write((char*)(&hdr), sizeof(obj_hdr_t));
+    f.write((char*)(&permission), sizeof(int));
     f.write(path.c_str(), hdr.path_len);
     f.write(content.c_str(), content.length());
     f.close();
@@ -82,6 +93,14 @@ void Blob::save_as_file() {
     ofstream f(path.c_str(), ios::trunc);
     f.write(content.c_str(), content.length());
     f.close();
+}
+
+string& Blob::get_path() {
+    return path;
+}
+
+int Blob::get_permission() {
+    return permission;
 }
 
 #ifdef BLOB_TEST

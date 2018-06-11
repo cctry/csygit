@@ -11,7 +11,6 @@
 #include "cerror.hpp"
 #include "utils.hpp"
 
-#define DEFAULT_REPO_NAME ".repo"
 #define DEFAULT_OBJECTS_NAME "objects"
 #define DEFAULT_OBJECTS_PATH DEFAULT_REPO_NAME "/" DEFAULT_OBJECTS_NAME "/"
 using namespace cerror;
