@@ -48,10 +48,10 @@ Blob* Blob::get_blob_from_db(string hash) {
 #endif
     // check the header of obj file
     if (hdr.signature != SIGNATURE) {
-        occur_error("courrpted file.\n");  // TODO
+        occur_error("corrupted file: "+ obj_path);  // TODO
     }
 
-    // get the orignal path of file
+    // get the original path of file
     char* path = new char[hdr.path_len + 1];
     f.read(path, hdr.path_len * sizeof(char));
     path[hdr.path_len] = '\0';

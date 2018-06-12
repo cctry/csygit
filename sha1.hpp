@@ -284,6 +284,15 @@ class sha1 {
         print_hex(this->hex);
         f.close();
     }
+
+    static string hash_a_string(string str) {
+        sha1 s("");
+        s.add(str.c_str());
+        s.finalize();
+        char _hex[SHA1_HEX_SIZE];
+        s.print_hex(_hex);
+        return string(_hex);
+    }
 };
 #endif
 

@@ -49,8 +49,8 @@ void repo::init_db() {
     }
 }
 
-#define SLASH (string("/"))
-
+#define SLASH "/"
+// rebuild the actual path of a obj in the obj db
 string get_obj_path(string hash) {
     string catalog = hash.substr(0, 2);
     string filename = hash.substr(2);
@@ -58,11 +58,16 @@ string get_obj_path(string hash) {
            filename;  //.repo/objects/catalog/filename
 }
 
+string repo::load_obj(string hash) {
+    return get_obj_path(hash);
+}
+
+// save a obj
 void repo::save_obj(Object& obj) {
     string hash = obj.get_hash();
     string path = get_obj_path(hash);
     if (util::is_file_exist(path)) {  // if the object exist.
-        // TODO hash confilct
+                                      // TODO hash confilct
     } else {
         ofstream f(path.c_str(), ios::out | ios::binary);
         if (f.bad()) {
@@ -71,8 +76,4 @@ void repo::save_obj(Object& obj) {
         f.close();
         obj.save_as_obj(path);
     }
-}
-
-string repo::load_obj(string hash) {
-    return get_obj_path(hash);
 }
