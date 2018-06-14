@@ -2,6 +2,7 @@
 #define OBJECT_H
 #include <ctime>
 #include <string>
+#include <fstream>
 #define SIGNATURE 0x1789
 #define VERSION 0x99
 using namespace std;
@@ -25,6 +26,7 @@ class Object {
     virtual void save_as_obj(string obj_path) = 0;
     obj_hdr_t& get_hdr();
     string& get_hash();
+    int load_hdr(ifstream& f);
 };
 
 #endif
