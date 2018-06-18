@@ -10,7 +10,7 @@ obj_hdr_t& Object::get_hdr() {
     return hdr;
 }
 
-std::string& Object::get_hash() {
+const std::string& Object::get_hash() {
     return hash;
 }
 

@@ -68,7 +68,7 @@ Blob* Blob::get_blob_from_db(string hash) {
     return res;
 }
 
-string& Blob::get_content() {
+const string& Blob::get_content() {
     return content;
 }
 
@@ -95,7 +95,7 @@ void Blob::save_as_file() {
     f.close();
 }
 
-string& Blob::get_path() {
+const string& Blob::get_path() {
     return path;
 }
 

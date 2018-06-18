@@ -5,7 +5,8 @@
 #ifndef SHA1_H
 #define SHA1_H
 
-#define SHA1_HEX_SIZE (40 + 1)
+#define HASH_LEN 40 
+#define SHA1_HEX_SIZE (HASH_LEN + 1)
 #define SHA1_BASE64_SIZE (28 + 1)
 using namespace std;
 class sha1 {

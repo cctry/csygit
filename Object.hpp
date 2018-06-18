@@ -25,7 +25,7 @@ class Object {
    public:
     virtual void save_as_obj(string obj_path) = 0;
     obj_hdr_t& get_hdr();
-    string& get_hash();
+    const string& get_hash();
     int load_hdr(ifstream& f);
 };
 
