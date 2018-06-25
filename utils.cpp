@@ -15,7 +15,7 @@
 #endif
 
 using namespace std;
-int util::get_file_size(string path) {
+int util::get_file_size(const string& path) {
     if (!util::is_file_exist(path)) {
         cerror::occur_error("file is not existed: " + path);
     }
@@ -26,7 +26,7 @@ int util::get_file_size(string path) {
     return size;
 }
 
-string util::get_file_content(string path) {
+string util::get_file_content(const string& path) {
     if (!util::is_file_exist(path)) {
         cerror::occur_error("file is not existed: " + path);
     }
@@ -36,7 +36,7 @@ string util::get_file_content(string path) {
     return str;
 }
 
-bool util::is_file_exist(string path) {
+bool util::is_file_exist(const string& path) {
     if (access(path.c_str(), F_OK) == -1) {
         return false;
     } else {
@@ -44,11 +44,18 @@ bool util::is_file_exist(string path) {
     }
 }
 
+bool util::is_dir_exist(const string& path) {
+    if (opendir(path.c_str()) == NULL)
+        return false;
+    else
+        return true;
+}
+
 #define FILE_MODE 8
 #define DIR_MODE 4
 #define ALL_MODE -1
 
-vector<string> scan_dir(int mode, string dirname) {
+vector<string> scan_dir(int mode, const string& dirname) {
     DIR* dp;
     struct dirent* dirp;
     if ((dp = opendir(dirname.c_str())) == NULL)
@@ -76,33 +83,33 @@ vector<string> scan_dir(int mode, string dirname) {
     return res;
 }
 
-vector<string> util::get_all_files(string path) {
+vector<string> util::get_all_files(const string& path) {
     return scan_dir(FILE_MODE, path);
 }
 
-vector<string> util::get_all_dirs(string path) {
+vector<string> util::get_all_dirs(const string& path) {
     return scan_dir(DIR_MODE, path);
 }
 
-int get_permission(string path, int mode) {  // 1 for file, 2 for dir
+int get_permission(const string& path, int mode) {  // 1 for file, 2 for dir
     struct stat buf;
     if (stat(path.c_str(), &buf) == -1) {
-        cout << string("cannot access file: " + path) << endl;
+        cerror::occur_error(string("cannot access file: ") + path);
     }
     if (S_ISDIR(buf.st_mode) && mode == 1) {  // is a dir but want file
-        cout << string("mistaken a dir as a file: " + path) << endl;
+        cerror::occur_error(string("mistaken a dir as a file: ") + path);
     } else if (!S_ISDIR(buf.st_mode) && mode == 2) {  // is a file but want dir
-        cout << string("mistaken a file as a dir: " + path) << endl;
+        cerror::occur_error(string("mistaken a file as a dir: ") + path);
     } else {
         return (int)(buf.st_mode) & 511;
     }
 }
 
-int util::get_file_permission(string path) {
+int util::get_file_permission(const string& path) {
     return get_permission(path, 1);
 }
 
-int util::get_dir_permission(string path) {
+int util::get_dir_permission(const string& path) {
     return get_permission(path, 2);
 }
 
@@ -114,4 +121,14 @@ vector<string> util::get_lines(ifstream& f) {
         res.push_back(line);
     }
     return res;
+}
+
+int util::load_a_int(ifstream& f) {
+    int temp = 0;
+    f.read((char*)(&temp), sizeof(int));
+    if (temp) {
+        return temp;
+    } else {
+        return -1;
+    }
 }

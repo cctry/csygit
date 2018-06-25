@@ -5,14 +5,16 @@
 #include <string>
 #include <vector>
 namespace util {
-extern int get_file_size(std::string path);
-extern std::string get_file_content(std::string path);
-extern bool is_file_exist(std::string path);
-extern std::vector<std::string> get_all_files(std::string path);
-extern std::vector<std::string> get_all_dirs(std::string path);
-extern int get_dir_permission(std::string path);
-extern int get_file_permission(std::string path);
-std::vector<std::string> get_lines(std::ifstream& f);
+extern int get_file_size(const std::string& path);
+extern std::string get_file_content(const std::string& path);
+extern bool is_file_exist(const std::string& path);
+extern std::vector<std::string> get_all_files(const std::string& path);
+extern std::vector<std::string> get_all_dirs(const std::string& path);
+extern int get_dir_permission(const std::string& path);
+extern int get_file_permission(const std::string& path);
+std::vector<std::string> get_lines(std::ifstream &f);
+bool is_dir_exist(const std::string& path);
+int load_a_int(std::ifstream &f);
 
 /*
  * The result include begin and exclude end
@@ -23,25 +25,24 @@ std::vector<std::string> get_lines(std::ifstream& f);
  * Literally, it equals to vec.size() - 1
  */
 template <typename T>
-std::vector<T> slice_vector(std::vector<T>& vec,
-                            int begin,
+std::vector<T> slice_vector(const std::vector<T> &vec, int begin,
                             long end = LONG_MAX) {
-    int tbegin = begin;
-    int tend = end;
-    if (end < 0) {
-        tend = vec.size() + end;
-    }
-    if (end == LONG_MAX) {
-        tend = vec.size();
-    }
-    if (begin < 0) {
-        tbegin = vec.size() + begin;
-    }
-    auto first = vec.begin() + tbegin;
-    auto last = vec.begin() + tend;
-    std::vector<T> res(first, last);
-    return res;
+  int tbegin = begin;
+  int tend = end;
+  if (end < 0) {
+    tend = vec.size() + end;
+  }
+  if (end == LONG_MAX) {
+    tend = vec.size();
+  }
+  if (begin < 0) {
+    tbegin = vec.size() + begin;
+  }
+  auto first = vec.begin() + tbegin;
+  auto last = vec.begin() + tend;
+  std::vector<T> res(first, last);
+  return res;
 }
 
-}  // namespace util
-#endif  // UTIL_H
+} // namespace util
+#endif // UTIL_H
