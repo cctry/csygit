@@ -11,7 +11,7 @@ using namespace std;
 using namespace cerror;
 
 // static construction function for blob from a normal file
-Blob* Blob::get_blob_from_file(string path) {
+Blob* Blob::get_blob_from_file(const string& path) {
     Blob* res = new Blob;
     res->init_hdr();
 #ifdef DEBUG
@@ -33,7 +33,7 @@ Blob* Blob::get_blob_from_file(string path) {
 }
 
 // static construct function for blob from a obj file
-Blob* Blob::get_blob_from_db(string hash) {
+Blob* Blob::get_blob_from_db(const string& hash) {
     // open the object in db
     Blob* res = new Blob;
     res->hash = hash;
@@ -46,9 +46,11 @@ Blob* Blob::get_blob_from_db(string hash) {
     }
 
     //get permission
-    int ptemp = 0;
-    f.read((char*)(&ptemp), sizeof(int));
-    res->permission = ptemp;
+    int permission = util::load_a_int(f);
+    if (permission == -1) {
+        cerror::occur_error("corrupted file: " + obj_path);
+    }
+    res->permission = permission;
 
     // get the original path of file
     obj_hdr_t& hdr = res->get_hdr();
@@ -68,10 +70,6 @@ Blob* Blob::get_blob_from_db(string hash) {
     return res;
 }
 
-const string& Blob::get_content() {
-    return content;
-}
-
 /*
  * The structure of blob file.
  * |version|signature|size|path_len|time|  <--- header
@@ -79,7 +77,7 @@ const string& Blob::get_content() {
  * |path|
  * |content|
  */
-void Blob::save_as_obj(string obj_path) {
+void Blob::save_as_obj(const string& obj_path) {
     ofstream f(obj_path.c_str(), ios::binary);
     f.write((char*)(&hdr), sizeof(obj_hdr_t));
     f.write((char*)(&permission), sizeof(int));
@@ -95,22 +93,13 @@ void Blob::save_as_file() {
     f.close();
 }
 
-const string& Blob::get_path() {
-    return path;
-}
-
-int Blob::get_permission() {
-    return permission;
-}
-
 #ifdef BLOB_TEST
-
 void prt_hdr(obj_hdr_t& hdr) {
     cout << "size: " << hdr.size << endl;
     cout << "path_len: " << hdr.path_len << endl;
 }
 
-Blob* Blob::load_obj(string obj_path) {
+Blob* Blob::load_obj(const string& obj_path) {
     Blob* res = new Blob;
     ifstream f(obj_path.c_str(), ios::binary);
     // filled with hdr information
@@ -167,5 +156,4 @@ int main(int args, char** argv) {
     delete blob;
     return 0;
 }
-
 #endif
