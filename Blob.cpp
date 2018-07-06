@@ -7,11 +7,11 @@
 #include "sha1.hpp"
 #include "utils.hpp"
 
-using namespace std;
 using namespace cerror;
 
 // static construction function for blob from a normal file
-Blob* Blob::get_blob_from_file(const string& path) {
+Blob* Blob::get_blob_from_file(const std::string& path) {
+    using namespace std;
     Blob* res = new Blob;
     res->init_hdr();
 #ifdef DEBUG
@@ -33,7 +33,7 @@ Blob* Blob::get_blob_from_file(const string& path) {
 }
 
 // static construct function for blob from a obj file
-Blob* Blob::get_blob_from_db(const string& hash) {
+Blob* Blob::get_blob_from_db(const std::string& hash) {
     // open the object in db
     Blob* res = new Blob;
     res->hash = hash;
@@ -54,11 +54,7 @@ Blob* Blob::get_blob_from_db(const string& hash) {
 
     // get the original path of file
     obj_hdr_t& hdr = res->get_hdr();
-    char* path = new char[hdr.path_len + 1];
-    f.read(path, hdr.path_len * sizeof(char));
-    path[hdr.path_len] = '\0';
-    res->path = string(path);
-    delete[] path;
+    res->path = util::load_string_from_file(hdr.path_len, f);   
 
     // get content
     stringstream stemp;
@@ -77,7 +73,7 @@ Blob* Blob::get_blob_from_db(const string& hash) {
  * |path|
  * |content|
  */
-void Blob::save_as_obj(const string& obj_path) {
+void Blob::save_as_obj(const std::string& obj_path) {
     ofstream f(obj_path.c_str(), ios::binary);
     f.write((char*)(&hdr), sizeof(obj_hdr_t));
     f.write((char*)(&permission), sizeof(int));
@@ -93,13 +89,20 @@ void Blob::save_as_file() {
     f.close();
 }
 
+Blob::Blob(Blob&& blob) {
+    path = std::move(blob.path);
+    content = std::move(blob.content);
+    permission = blob.permission;
+    hdr = std::move(blob.hdr);
+}
+
 #ifdef BLOB_TEST
 void prt_hdr(obj_hdr_t& hdr) {
     cout << "size: " << hdr.size << endl;
     cout << "path_len: " << hdr.path_len << endl;
 }
 
-Blob* Blob::load_obj(const string& obj_path) {
+Blob* Blob::load_obj(const std::string& obj_path) {
     Blob* res = new Blob;
     ifstream f(obj_path.c_str(), ios::binary);
     // filled with hdr information
@@ -112,7 +115,7 @@ Blob* Blob::load_obj(const string& obj_path) {
     f.read((char*)(&ptemp), sizeof(int));
     res->permission = ptemp;
     
-    // get the orignal path of file
+    // get the original path of file
     obj_hdr_t& hdr = res->get_hdr();
     char* path = new char[hdr.path_len + 1];
     f.read(path, hdr.path_len * sizeof(char));

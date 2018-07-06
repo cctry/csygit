@@ -1,9 +1,7 @@
+#pragma once
 #include <stdint.h>
 #include <string.h>
 #include <fstream>
-
-#ifndef SHA1_H
-#define SHA1_H
 
 #define HASH_LEN 40 
 #define SHA1_HEX_SIZE (HASH_LEN + 1)
@@ -295,7 +293,6 @@ class sha1 {
         return string(_hex);
     }
 };
-#endif
 
 #ifdef SHA1_TEST
 #include <iostream>
@@ -304,5 +301,4 @@ int main(int args, char** argv) {
     s.get_sha1_from_file(argv[1]);
     cout << s.hex << endl;
 }
-
 #endif

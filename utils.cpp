@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <streambuf>
 #include <string>
 #include <vector>
@@ -11,10 +12,11 @@
 #include "repo.hpp"
 
 #ifndef DEFAULT_REPO_NAME
-#define DEFAULT_REPO_NAME ".repo"
+#    define DEFAULT_REPO_NAME ".repo"
 #endif
 
 using namespace std;
+using namespace util;
 int util::get_file_size(const string& path) {
     if (!util::is_file_exist(path)) {
         cerror::occur_error("file is not existed: " + path);
@@ -58,28 +60,23 @@ bool util::is_dir_exist(const string& path) {
 vector<string> scan_dir(int mode, const string& dirname) {
     DIR* dp;
     struct dirent* dirp;
-    if ((dp = opendir(dirname.c_str())) == NULL)
-        cerror::occur_error("Cannot open " + dirname);
     vector<string> res;
-    while ((dirp = readdir(dp)) != NULL) {
-        switch (mode) {
-            case FILE_MODE:
-                if (dirp->d_type == 8)
-                    res.push_back(string(dirp->d_name));
-                break;
-            case DIR_MODE:
-                if (dirp->d_type == 4) {
-                    if (string(dirp->d_name) != ".." &&
-                        string(dirp->d_name) != "." &&
-                        string(dirp->d_name) == DEFAULT_REPO_NAME) {
-                        res.push_back(string(dirp->d_name));
-                    }
-                }
-                break;
-            default:
-                res.push_back(string(dirp->d_name));
+    res.reserve(5);
+    if ((dp = opendir(dirname.c_str())) == NULL)
+        cout << "Can't open " << dirname << endl;
+    if (mode == ALL_MODE) {
+        while ((dirp = readdir(dp)) != NULL) {
+            res.push_back(dirp->d_name);
+        }
+    } else {
+        while ((dirp = readdir(dp)) != NULL) {
+            if (dirp->d_type == mode && string(dirp->d_name) != ".." &&
+                string(dirp->d_name) != "." &&
+                string(dirp->d_name) != DEFAULT_REPO_NAME)
+                res.push_back(dirp->d_name);
         }
     }
+    closedir(dp);
     return res;
 }
 
@@ -118,7 +115,7 @@ vector<string> util::get_lines(ifstream& f) {
     vector<string> res;
     while (!f.eof()) {
         std::getline(f, line);
-        res.push_back(line);
+        res.push_back(move(line));
     }
     return res;
 }
@@ -131,4 +128,23 @@ int util::load_a_int(ifstream& f) {
     } else {
         return -1;
     }
+}
+
+string util::load_string_from_file(int len, ifstream& f) {
+    unique_ptr<char> path(new char[len + 1]{});
+    f.read(path.get(), len * sizeof(char));
+    return string(path.get());
+}
+
+int util::cmkdir(const string& path, int mode) {
+    return mkdir(path.c_str(), mode);
+}
+
+hash_t util::str_hash(const std::string& str) {
+    hash_t ret{basis};
+    for (char s : str) {
+        ret ^= s;
+        ret *= prime;
+    }
+    return ret;
 }

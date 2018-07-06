@@ -1,5 +1,4 @@
-#ifndef OBJECT_H
-#define OBJECT_H
+#pragma once
 #include <ctime>
 #include <string>
 #include <fstream>
@@ -25,8 +24,9 @@ class Object {
    public:
     virtual void save_as_obj(const string& obj_path) = 0;
     obj_hdr_t& get_hdr();
-    const string& get_hash();
+    const string& get_hash() {return hash;};
     int load_hdr(ifstream& f);
+    #ifdef DEBUG
+    void prtHdr();
+    #endif
 };
-
-#endif

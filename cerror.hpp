@@ -1,6 +1,4 @@
-#ifndef CERROR_H
-#define CERROR_H
-
+#pragma once
 #include <error.h>
 #include <stdlib.h>
 #include <iostream>
@@ -11,5 +9,3 @@ namespace cerror {
 void occur_error(string info);
 
 }  // namespace cerror
-
-#endif
