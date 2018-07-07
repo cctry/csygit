@@ -21,9 +21,6 @@ void Dir::save_as_obj(const std::string& obj_path) {
     using namespace std;
     ofstream f(obj_path.c_str(), ios::binary|ios::trunc);
     f.write((char *)(&hdr), sizeof(obj_hdr_t));   // write header
-    #ifdef DEBUG
-    prtHdr();
-    #endif
     f.write(path.c_str(), hdr.path_len);          // write path
     f.write((char *)(&permission), sizeof(int));  // write permission
     int nums[2] = {(int)dirs.size(), (int)files.size()};

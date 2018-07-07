@@ -16,21 +16,17 @@
 using namespace cerror;
 using namespace std;
 
-int cmkdir(string path, int mode) {
-    return mkdir(path.c_str(), mode);
-}
-
 void repo::init_db() {
     ostringstream buffer;
     buffer << DEFAULT_REPO_NAME;
     // create ./DEFAULT_REPO_NAME
-    if (cmkdir(buffer.str(), 0700) < 0) {
+    if (util::cmkdir(buffer.str(), 0700) < 0) {
         // mkdir failed
         occur_error("Failed to create repository");
     }
     // create ./DEFAULT_REPO_NAME/DEFAULT_OBJECTS_NAME
     buffer << '/' << DEFAULT_OBJECTS_NAME;
-    if (cmkdir(buffer.str(), 0700) < 0) {
+    if (util::cmkdir(buffer.str(), 0700) < 0) {
         // mkdir failed
         occur_error("Failed to create repository");
     }
@@ -42,7 +38,7 @@ void repo::init_db() {
         sprintf(buf, "%02x", i);
         sbuf = buf;
         string path = buffer.str() + sbuf;
-        if (cmkdir(path, 0700) < 0) {
+        if (util::cmkdir(path, 0700) < 0) {
             // mkdir failed
             occur_error("Failed to create repository db");
         }
@@ -51,14 +47,14 @@ void repo::init_db() {
 
 #define SLASH "/"
 // rebuild the actual path of a obj in the obj db
-string get_obj_path(string hash) {
+string get_obj_path(const string& hash) {
     string catalog = hash.substr(0, 2);
     string filename = hash.substr(2);
     return string(DEFAULT_OBJECTS_PATH) + catalog + SLASH +
            filename;  //.repo/objects/catalog/filename
 }
 
-string repo::load_obj(string hash) {
+string repo::load_obj(const string& hash) {
     return get_obj_path(hash);
 }
 
