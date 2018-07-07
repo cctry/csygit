@@ -5,39 +5,40 @@
 #include <unistd.h>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include "Object.hpp"
 #include "cerror.hpp"
 #include "utils.hpp"
 
+#define SLASH "/"
 #define DEFAULT_OBJECTS_NAME "objects"
-#define DEFAULT_OBJECTS_PATH DEFAULT_REPO_NAME "/" DEFAULT_OBJECTS_NAME "/"
+#define DEFAULT_OBJECTS_PATH DEFAULT_REPO_NAME SLASH DEFAULT_OBJECTS_NAME SLASH
 using namespace cerror;
 using namespace std;
 
 void repo::init_db() {
-    ostringstream buffer;
-    buffer << DEFAULT_REPO_NAME;
+    string buffer = "";
+    buffer += DEFAULT_REPO_NAME;
     // create ./DEFAULT_REPO_NAME
-    if (util::cmkdir(buffer.str(), 0700) < 0) {
+    if (util::cmkdir(buffer, 0700) < 0) {
         // mkdir failed
         occur_error("Failed to create repository");
     }
     // create ./DEFAULT_REPO_NAME/DEFAULT_OBJECTS_NAME
-    buffer << '/' << DEFAULT_OBJECTS_NAME;
-    if (util::cmkdir(buffer.str(), 0700) < 0) {
+    buffer += SLASH;
+    buffer += DEFAULT_OBJECTS_NAME;
+    if (util::cmkdir(buffer, 0700) < 0) {
         // mkdir failed
         occur_error("Failed to create repository");
     }
 
-    buffer << '/';
+    buffer += SLASH;
     char buf[3] = {0, 0, 0};
     string sbuf;
     for (int i = 0; i < 256; i++) {  // hex from 0 ro 256
         sprintf(buf, "%02x", i);
         sbuf = buf;
-        string path = buffer.str() + sbuf;
+        string path = buffer + sbuf;
         if (util::cmkdir(path, 0700) < 0) {
             // mkdir failed
             occur_error("Failed to create repository db");
@@ -45,7 +46,7 @@ void repo::init_db() {
     }
 }
 
-#define SLASH "/"
+
 // rebuild the actual path of a obj in the obj db
 string get_obj_path(const string& hash) {
     string catalog = hash.substr(0, 2);
@@ -63,7 +64,7 @@ void repo::save_obj(Object& obj) {
     string hash = obj.get_hash();
     string path = get_obj_path(hash);
     if (util::is_file_exist(path)) {  // if the object exist.
-                                      // TODO hash confilct
+                                     // TODO hash confilct
     } else {
         ofstream f(path.c_str(), ios::out | ios::binary);
         if (f.bad()) {
