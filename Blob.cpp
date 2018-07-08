@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include "Object.hpp"
 #include "cerror.hpp"
 #include "repo.hpp"
 #include "sha1.hpp"
@@ -26,8 +27,7 @@ Blob* Blob::get_blob_from_file(const std::string& path) {
     cout << "hash: " << res->hash << endl;
 #endif
     res->content = util::get_file_content(path);
-    int size = util::get_file_size(path);
-    res->hdr.size = size;
+    res->size = util::get_file_size(path);
     res->hdr.path_len = path.length();
     return res;
 }
@@ -35,9 +35,13 @@ Blob* Blob::get_blob_from_file(const std::string& path) {
 // static construct function for blob from a obj file
 Blob* Blob::get_blob_from_db(const std::string& hash) {
     // open the object in db
+    string obj_path = repo::load_obj(hash);
+    return load_obj(obj_path, hash);
+}
+
+Blob* Blob::load_obj(const std::string& obj_path, const std::string& hash) {
     Blob* res = new Blob;
     res->hash = hash;
-    string obj_path = repo::load_obj(hash);
     ifstream f(obj_path.c_str(), ios::binary);
 
     // filled with hdr information
@@ -45,20 +49,18 @@ Blob* Blob::get_blob_from_db(const std::string& hash) {
         occur_error("corrupted file: " + obj_path);  // TODO
     }
 
-    //get permission
-    int permission = util::load_a_int(f);
-    if (permission == -1) {
-        cerror::occur_error("corrupted file: " + obj_path);
-    }
-    res->permission = permission;
+    // get permission
+    res->permission = util::load_a_int(f);
 
-    // get the original path of file
-    obj_hdr_t& hdr = res->get_hdr();
-    res->path = util::load_string_from_file(hdr.path_len, f);   
+    // get size
+    res->size = util::load_a_int(f);
+
+    // get path
+    res->path = util::load_string_from_file(res->hdr.path_len, f);
 
     // get content
     stringstream stemp;
-    for (int i = 0; i < hdr.size; i++) {
+    for (int i = 0; i < res->size; i++) {
         stemp << (char)f.get();
     }
     f.close();
@@ -69,7 +71,7 @@ Blob* Blob::get_blob_from_db(const std::string& hash) {
 /*
  * The structure of blob file.
  * |version|signature|size|path_len|time|  <--- header
- * |permission|
+ * |permission|size|
  * |path|
  * |content|
  */
@@ -77,6 +79,7 @@ void Blob::save_as_obj(const std::string& obj_path) {
     ofstream f(obj_path.c_str(), ios::binary);
     f.write((char*)(&hdr), sizeof(obj_hdr_t));
     f.write((char*)(&permission), sizeof(int));
+    f.write((char*)(&size), sizeof(int));
     f.write(path.c_str(), hdr.path_len);
     f.write(content.c_str(), content.length());
     f.close();
@@ -93,69 +96,26 @@ Blob::Blob(Blob&& blob) {
     path = std::move(blob.path);
     content = std::move(blob.content);
     permission = blob.permission;
+    size = blob.size;
     hdr = std::move(blob.hdr);
 }
 
 #ifdef BLOB_TEST
-void prt_hdr(obj_hdr_t& hdr) {
-    cout << "size: " << hdr.size << endl;
-    cout << "path_len: " << hdr.path_len << endl;
-}
-
-Blob* Blob::load_obj(const std::string& obj_path) {
-    Blob* res = new Blob;
-    ifstream f(obj_path.c_str(), ios::binary);
-    // filled with hdr information
-    if (res->load_hdr(f) == -1) {
-        occur_error("corrupted file: " + obj_path);  // TODO
-    }
-
-    //get permission
-    int ptemp = 0;
-    f.read((char*)(&ptemp), sizeof(int));
-    res->permission = ptemp;
-    
-    // get the original path of file
-    obj_hdr_t& hdr = res->get_hdr();
-    char* path = new char[hdr.path_len + 1];
-    f.read(path, hdr.path_len * sizeof(char));
-
-    string spath = obj_path + ".path";
-    ofstream f1(spath.c_str(), ios::binary);
-    f1.write(path, hdr.path_len * sizeof(char));
-    f1.close();
-
-    path[hdr.path_len] = '\0';
-    res->path = string(path);
-    delete[] path;
-    // get content
-    stringstream stemp;
-    for (int i = 0; i < hdr.size; i++) {
-        stemp << (char)f.get();
-    }
-    f.close();
-    res->content = stemp.str();
-    return res;
-}
-
 int main(int args, char** argv) {
     Blob* blob = Blob::get_blob_from_file(string(argv[1]));
     cout << blob->get_hash() << endl;
-    string src = string(argv[1]) + string(".tmp");
+    string dest = string(argv[1]) + string(".tmp");
     obj_hdr_t& hdr = blob->get_hdr();
-    cout<<"time from create "<<hdr.time<<endl;
     // save obj file
-    blob->save_as_obj(src);
+    blob->save_as_obj(dest);
     delete blob;
     // read obj file
-    blob = Blob::load_obj(src);
+    blob = Blob::load_obj(dest, "123");
     hdr = blob->get_hdr();
-    cout<<"time from load "<<hdr.time<<endl;
-    prt_hdr(hdr);
     cout << "permission: " << blob->get_permission() << endl;
+    cout << "size: " << blob->get_size() << endl;
     cout << blob->get_path() << endl;
     cout << blob->get_content() << endl;
-    
     delete blob;
     return 0;
 }

@@ -5,6 +5,7 @@ class Blob : public Object {
     string path;
     string content;
     int permission;
+    int size;
 
    public:
     static Blob* get_blob_from_file(const std::string& path);
@@ -15,8 +16,7 @@ class Blob : public Object {
     const std::string& get_content() { return content; }
     const std::string& get_path() { return path; }
     const int get_permission() { return permission; }
-    Blob() {};
-#ifdef BLOB_TEST
-    static Blob* load_obj(const std::string& obj_path);
-#endif
+    Blob(){};
+    const int get_size() { return size; };
+    static Blob* load_obj(const std::string& obj_path, const std::string& hash);
 };

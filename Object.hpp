@@ -9,7 +9,6 @@ using namespace std;
 struct obj_hdr_t {
     int version;
     int signature;
-    int size;
     int path_len;
     time_t time;
 };

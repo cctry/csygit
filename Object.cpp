@@ -12,7 +12,6 @@ void Object::init_hdr() {
 void Object::prtHdr() {
     std::cout << "Signature: " << hdr.signature << std::endl
               << "Version: " << hdr.version << std::endl
-              << "Size: " << hdr.size << std::endl
               << "Path_len: " << hdr.path_len << std::endl;
 }
 #endif
