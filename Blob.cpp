@@ -35,14 +35,14 @@ Blob* Blob::get_blob_from_file(const std::string& path) {
 // static construct function for blob from a obj file
 Blob* Blob::get_blob_from_db(const std::string& hash) {
     // open the object in db
-    string obj_path = repo::load_obj(hash);
+    std::string obj_path = repo::load_obj(hash);
     return load_obj(obj_path, hash);
 }
 
 Blob* Blob::load_obj(const std::string& obj_path, const std::string& hash) {
     Blob* res = new Blob;
     res->hash = hash;
-    ifstream f(obj_path.c_str(), ios::binary);
+    std::ifstream f(obj_path.c_str(), std::ios::binary);
 
     // filled with hdr information
     if (res->load_hdr(f) == -1) {
@@ -59,7 +59,7 @@ Blob* Blob::load_obj(const std::string& obj_path, const std::string& hash) {
     res->path = util::load_string_from_file(res->hdr.path_len, f);
 
     // get content
-    stringstream stemp;
+    std::stringstream stemp;
     for (int i = 0; i < res->size; i++) {
         stemp << (char)f.get();
     }
@@ -70,13 +70,13 @@ Blob* Blob::load_obj(const std::string& obj_path, const std::string& hash) {
 
 /*
  * The structure of blob file.
- * |version|signature|size|path_len|time|  <--- header
+ * |version|signature|path_len|time|  <--- header
  * |permission|size|
  * |path|
  * |content|
  */
 void Blob::save_as_obj(const std::string& obj_path) {
-    ofstream f(obj_path.c_str(), ios::binary);
+    std::ofstream f(obj_path.c_str(), std::ios::binary);
     f.write((char*)(&hdr), sizeof(obj_hdr_t));
     f.write((char*)(&permission), sizeof(int));
     f.write((char*)(&size), sizeof(int));
@@ -87,7 +87,7 @@ void Blob::save_as_obj(const std::string& obj_path) {
 
 // save blob to its original path
 void Blob::save_as_file() {
-    ofstream f(path.c_str(), ios::trunc);
+    std::ofstream f(path.c_str(), std::ios::trunc);
     f.write(content.c_str(), content.length());
     f.close();
 }

@@ -3,9 +3,8 @@
 #include <stdlib.h>
 #include <iostream>
 
-using namespace std;
 namespace cerror {
     
-void occur_error(string info);
+void occur_error(std::string info);
 
 }  // namespace cerror

@@ -6,7 +6,6 @@
 #define HASH_LEN 40 
 #define SHA1_HEX_SIZE (HASH_LEN + 1)
 #define SHA1_BASE64_SIZE (28 + 1)
-using namespace std;
 class sha1 {
    private:
     void add_byte_dont_count_bits(uint8_t x) {
@@ -271,7 +270,7 @@ class sha1 {
     char base64[SHA1_BASE64_SIZE];
 
     void get_sha1_from_file(const char* path) {
-        fstream f;
+        std::fstream f;
         f.open(path);
         while (!f.eof()) {
             char c = f.get();
@@ -284,13 +283,13 @@ class sha1 {
         f.close();
     }
 
-    static string hash_a_string(string str) {
+    static std::string hash_a_string(std::string str) {
         sha1 s("");
         s.add(str.c_str());
         s.finalize();
         char _hex[SHA1_HEX_SIZE];
         s.print_hex(_hex);
-        return string(_hex);
+        return std::string(_hex);
     }
 };
 

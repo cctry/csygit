@@ -2,8 +2,8 @@
 #include "Object.hpp"
 class Blob : public Object {
    private:
-    string path;
-    string content;
+	std::string path;
+	std::string content;
     int permission;
     int size;
 
