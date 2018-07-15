@@ -11,9 +11,9 @@
 
 /*
  * The structure of dir object file:
- * |version|signature|size|path_len|time|         <--- hdr
- * |path|permission|dir_num|blob_num|             <--- metadata
- * |hash|dir_path|\n|                             <--- content
+ * |version|signature|path_len|time|         <--- hdr
+ * |path|permission|dir_num|blob_num|        <--- metadata
+ * |hash|dir_path|\n|                        <--- content
  * |hash|blob_path|\n|
  * first is dir and followed blob
  */
@@ -45,7 +45,7 @@ void Dir::save_as_obj(const std::string& obj_path) {
 }
 
 // load a dir from a object in db
-Dir* Dir::get_dir_from_obj(const std::string& hash) {
+Dir* Dir::get_dir_from_db(const std::string& hash) {
     using namespace std;
     Dir *res = new Dir;
     res->hash = hash;
@@ -55,6 +55,7 @@ Dir* Dir::get_dir_from_obj(const std::string& hash) {
 }
 
 void Dir::load_obj(const std::string& obj_path, Dir& dir) {
+    using namespace std;
     ifstream f(obj_path.c_str(), ios::binary);
 
     // load header
@@ -75,7 +76,7 @@ void Dir::load_obj(const std::string& obj_path, Dir& dir) {
 
     // get number of blobs and dirs
     int dir_num = util::load_a_int(f);
-    int blob_num = util::load_a_int(f);
+    //int blob_num = util::load_a_int(f);
 
     // get dirs and blobs
     vector<string> items = util::get_lines(f);
@@ -91,7 +92,7 @@ void Dir::load_obj(const std::string& obj_path, Dir& dir) {
     for (string dir_item : dir_items) {
         hash_temp = dir_item.substr(0, HASH_LEN);
         path_temp = dir_item.substr(HASH_LEN);
-        dir_temp = Dir::get_dir_from_obj(hash_temp);
+        dir_temp = Dir::get_dir_from_db(hash_temp);
         // check path correctness
         if (dir_temp->get_path() != path_temp) {
             cerror::occur_error("Dir hash matching failed. Hash is " +
@@ -177,6 +178,13 @@ Dir* Dir::get_dir_from_path(const std::string &path) {
         #endif
         res->dirs.push_back(std::move(Dir::get_dir_from_path(path + "/" + dir_str)));
     }
+	// calculate the hash of this dir object
+	for (auto dir: res->dirs) {
+		res->hash = sha1::hash_a_string(util::cat_string(res->hash, dir->get_hash()));
+	}
+	for (auto file : res->files) {
+		res->hash = sha1::hash_a_string(util::cat_string(res->hash, file->get_hash()));
+	}
 
     #ifdef DIR_TEST
     res->files_names = files_temp;

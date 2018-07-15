@@ -8,7 +8,7 @@ class Dir : public Object {
    public:
     virtual void save_as_obj(const std::string& obj_path);
     static Dir* get_dir_from_path(const std::string& path);
-    static Dir* get_dir_from_obj(const std::string& hash);
+    static Dir* get_dir_from_db(const std::string& hash);
     const std::string& get_path() { return path; }
     const int get_permission() { return permission; }
     void recover_dir();

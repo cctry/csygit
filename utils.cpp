@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -47,10 +48,14 @@ bool util::is_file_exist(const string& path) {
 }
 
 bool util::is_dir_exist(const string& path) {
-    if (opendir(path.c_str()) == NULL)
+    auto d = opendir(path.c_str());
+    if (d == NULL) {
+        closedir(d);
         return false;
-    else
+    } else {
+        closedir(d);
         return true;
+    }
 }
 
 #define FILE_MODE 8
@@ -97,9 +102,8 @@ int get_permission(const string& path, int mode) {  // 1 for file, 2 for dir
         cerror::occur_error(string("mistaken a dir as a file: ") + path);
     } else if (!S_ISDIR(buf.st_mode) && mode == 2) {  // is a file but want dir
         cerror::occur_error(string("mistaken a file as a dir: ") + path);
-    } else {
-        return (int)(buf.st_mode) & 511;
     }
+    return (int)(buf.st_mode) & 511;
 }
 
 int util::get_file_permission(const string& path) {
@@ -147,4 +151,22 @@ hash_t util::str_hash(const std::string& str) {
         ret *= prime;
     }
     return ret;
+}
+
+const std::string& util::get_cwd() {
+    static std::string path = "";
+    if (path.empty()) {
+        std::unique_ptr<char[]> buffer(new char[1024]);
+        if (getcwd(buffer.get(), 1024) == nullptr) {
+            cerror::occur_error("cannot get the current directory");
+        }
+        path = std::string(buffer.get());
+        return path;
+    } else {
+        return path;
+    }
+}
+
+bool util::is_zero_hash(const std::string& s) {
+    return str_hash(zero_hash) == str_hash(s);
 }
